@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './LoginScreen';
 import RegistrarseScreen from './RegistrarseScreen';
+import HomeScreen from './HomeScreen';
 import StackScreen from './StackScreen';
 import App from './ScreenImagenes';
 import TakeCameraScreen from './ScreenCamera';
@@ -37,7 +38,20 @@ export default function AppNavigator() {
             headerTitleAlign: 'center',
           }}
         />
-        
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            headerStyle: {
+              backgroundColor: 'purple',
+            },
+            headerTintColor: 'black',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+            headerTitleAlign: 'center',
+          }}
+        />
         <Stack.Screen
           name="StackScreen"
           component={StackScreen}
@@ -119,17 +133,6 @@ export default function AppNavigator() {
           }}
         />
 
-        <Stack.Screen
-          name="Audios"
-          component={App} 
-          options={{ title: 'Audios' }}
-        />
-
-        <Stack.Screen
-          name="Ocio"
-          component={App} 
-          options={{ title: 'Ocio' }}
-        />
       </Stack.Navigator>
     </NavigationContainer>
   );

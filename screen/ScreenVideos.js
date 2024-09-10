@@ -1,42 +1,49 @@
 import { StatusBar } from "expo-status-bar";
-import {Button,FlatList,Modal,Pressable,StyleSheet,Text,View} from "react-native";
+import {
+    Button,
+    FlatList,
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
 import * as MediaLibrary from "expo-media-library";
 import { useState } from "react";
+import { Image } from "expo-image";
 import { Video, ResizeMode } from "expo-av";
 import { useNavigation } from "@react-navigation/native";
-
 export default function Videos() {
     const [galleryFiles, setGalleryFiles] = useState([]);
-    const [currentVideo, setCurrentVideo] = useState("");
-    const [mediaType, setMediaType] = useState("video");
-
+    const [currentImage, setCurrentImage] = useState("");
+    const [mediaType, setMediaType] = useState("image");
     const navigation = useNavigation(); 
-
     const fetchMedia = async (first, mediaType) => {
         const { status } = await MediaLibrary.requestPermissionsAsync();
         if (status === "granted") {
             const media = await MediaLibrary.getAssetsAsync({
                 first: first + 30,
                 sortBy: MediaLibrary.SortBy.creationTime,
-                mediaType: MediaLibrary.MediaType.video,
+                mediaType:
+                    mediaType === "image"
+                        ? MediaLibrary.MediaType.photo
+                        : MediaLibrary.MediaType.video,
             });
             setGalleryFiles(media.assets);
         }
     };
-
     const renderItem = ({ item }) => (
-        <View style={styles.videoContainer}>
+        <View style={styles.imageContainer}>
             <Pressable
                 onPress={() => {
-                    setCurrentVideo(item.uri);
+                    setCurrentImage(item.uri);
+                    setMediaType(item.mediaType);
                 }}
             >
-                <Video
+                <Image
                     source={{ uri: item.uri }}
                     style={{ width: 200, height: 200 }}
-                    resizeMode={ResizeMode.COVER}
-                    shouldPlay={false}
-                    isMuted={true}
                 />
             </Pressable>
         </View>
@@ -49,25 +56,22 @@ export default function Videos() {
             <View
                 style={{
                     flexDirection: "row",
-                    justifyContent: "space-around",
+                    justifyContent: "center",
                     width: "100%",
                     padding: 10,
                 }}
             >
                 <Button
-                    title="Take Videos"
-                    onPress={() => navigation.navigate("Camara")} 
+                    title="Take Video"
+                    onPress={() => {
+                        navigation.navigate('Camara')
+                    }}
                 />
             </View>
 
-            <Text style={styles.heading}>Galería de Videos</Text>
-            <Text style={styles.heading2}>Por favor toque el video que desea detallar</Text>
-
-            
-
-            {/* View full video in modal */}
-            <Modal visible={currentVideo !== ""} transparent={false}>
-                <View style={{ flex: 1, backgroundColor: "black" }}>
+            {/* view full image in modal */}
+            <Modal visible={currentImage !== ""} transparent={false}>
+                <View style={{ flex: 1, backgroundColor: 0 }}>
                     <Pressable
                         style={{
                             position: "absolute",
@@ -77,32 +81,47 @@ export default function Videos() {
                             alignSelf: "center",
                         }}
                         title="Close"
-                        onPress={() => setCurrentVideo("")}
+                        onPress={() => setCurrentImage("")}
                     >
                         <Text
                             style={{
-                                color: "white",
+                                color: "black",
                                 fontSize: 20,
                                 padding: 10,
-                                backgroundColor: "black",
+                                backgroundColor: "white",
                             }}
                         >
                             Close
                         </Text>
                     </Pressable>
-                    <Video
-                        style={{
-                            width: "100%",
-                            height: "100%",
-                        }}
-                        source={{ uri: currentVideo }}
-                        useNativeControls
-                        resizeMode={ResizeMode.CONTAIN}
-                        isLooping
-                    />
+                    {mediaType === "video" ? (
+                        <Video
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                            }}
+                            source={{
+                                uri: currentImage,
+                            }}
+                            useNativeControls
+                            resizeMode={ResizeMode.CONTAIN}
+                            isLooping
+                        />
+                    ) : (
+                        <Image
+                            source={{ uri: currentImage }}
+                            style={{ width: "100%", height: "100%" }}
+                        />
+                    )}
                 </View>
             </Modal>
             <View style={styles.scrollContainer}>
+                <Text style={{ fontSize: 20, marginBottom: 20, textAlign: "center" }}>
+                    Galeria
+                </Text>
+                <Text style={{ fontSize: 15, marginBottom: 20, textAlign: "center" }}>
+                    Por favor toque el video que desea detallar
+                </Text>
                 <FlatList
                     data={galleryFiles}
                     renderItem={renderItem}
@@ -122,6 +141,7 @@ export default function Videos() {
 
 const styles = StyleSheet.create({
     container: {
+        backgroundColor: "white",
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
@@ -133,23 +153,17 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     heading: {
-        color: "black",
-        fontSize: 24,
+        color: "purple",
+        fontSize: 30,
         textAlign: "center",
         fontWeight: "bold",
     },
-    heading2: {
-        color: "black",
-        fontSize: 16,
-        textAlign: "center",
-        fontWeight: "bold",
-        marginTop: 10,
-    },
-    videoContainer: {
+    imageContainer: {
         flex: 1,
         margin: 1,
-        aspectRatio: 1, // This ensures that videos maintain their aspect ratio
+        aspectRatio: 1, // This ensures that images maintain their aspect ratio
         borderRadius: 8,
         overflow: "hidden",
     },
+    image: {},
 });
